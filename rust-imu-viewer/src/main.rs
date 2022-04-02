@@ -1,6 +1,6 @@
 extern crate kiss3d;
 
-use std::{io, thread};
+use std::{error, io, thread};
 use std::fmt::{Display, Error, Formatter};
 use std::fs;
 use std::io::Stdin;
@@ -10,7 +10,7 @@ use kiss3d::window::Window;
 use kiss3d::light::Light;
 use kiss3d::nalgebra::{Vector3, UnitQuaternion, Point3, Point2};
 use kiss3d::scene::SceneNode;
-use kiss3d::text::Font;
+use regex::Regex;
 
 const IMU_HEIGHT: f32 = 0.5;
 const IMU_WIDTH: f32 = 1.0;
@@ -44,17 +44,26 @@ fn read_line_from_cl(stdin: &Stdin) -> String {
     let mut buffer = String::new();
     // read_line returns an error when a non-UTF8 character is read
     stdin.read_line(&mut buffer);
-    return buffer;
+    buffer
 }
 
-fn parse_line(line: &String) -> Result<Rotation3D, ParseFloatError> {
+fn parse_line(line: &String) -> Result<Option<Rotation3D>, ParseFloatError> {
+    // this regexp accept a string that contains 3 numbers (int or float) separated by a comma,
+    // and a new line at the end. The command line input must follow this pattern:
+    // 1.0,1.0,1.0\n
+    let regexp = Regex::new(r"^\d+(\.\d+)*,\d+(\.\d+)*,\d+(\.\d+)*\n$").unwrap();
+    if !regexp.is_match(line) {
+        return Ok(None);
+    }
     let tmp = line.replace("\n", "");
     let split: Vec<&str> = tmp.split(",").collect();
     let pitch: f32 = split[0].parse()?;
     let roll: f32 = split[1].parse()?;
     let yaw: f32 = split[2].parse()?;
-    return Ok(Rotation3D::new(pitch, roll, yaw));
+    Ok(Some(Rotation3D::new(pitch, roll, yaw)))
 }
+
+fn spawn_read_line_thread() {}
 
 fn rotate_cube(cube: &mut SceneNode, rotation: Rotation3D) {
     let pitch_rot = UnitQuaternion::from_axis_angle(&Vector3::x_axis(), rotation.pitch);
@@ -90,7 +99,10 @@ fn main() {
     loop {
         let mut line = read_line_from_cl(&stdin);
         match parse_line(&line) {
-            Ok(rotation) => println!("{}", rotation),
+            Ok(rotation) => match rotation {
+                None => println!("None value"),
+                Some(rot) => println!("Rotation: {}", rot)
+            }
             Err(err) => println!("Error: {}", err)
         }
     }
