@@ -4,6 +4,7 @@ use std::{io, thread};
 use std::fmt::{Display, Error, Formatter};
 use std::fs;
 use std::io::Stdin;
+use std::num::ParseFloatError;
 use std::rc::Rc;
 use kiss3d::window::Window;
 use kiss3d::light::Light;
@@ -46,12 +47,13 @@ fn read_line_from_cl(stdin: &Stdin) -> String {
     return buffer;
 }
 
-fn parse_line(line: &String) -> Result<Rotation3D, String> {
-    let split: Vec<&str> = line.split(",").collect();
-    for char in split {
-        println!("{}", char);
-    }
-    return Ok(Rotation3D::new(0.0, 0.0, 0.0));
+fn parse_line(line: &String) -> Result<Rotation3D, ParseFloatError> {
+    let tmp = line.replace("\n", "");
+    let split: Vec<&str> = tmp.split(",").collect();
+    let pitch: f32 = split[0].parse()?;
+    let roll: f32 = split[1].parse()?;
+    let yaw: f32 = split[2].parse()?;
+    return Ok(Rotation3D::new(pitch, roll, yaw));
 }
 
 fn rotate_cube(cube: &mut SceneNode, rotation: Rotation3D) {
@@ -86,7 +88,10 @@ fn main() {
     let stdin: Stdin = io::stdin();
 
     loop {
-        let line = read_line_from_cl(&stdin);
-        println!("{}", line);
+        let mut line = read_line_from_cl(&stdin);
+        match parse_line(&line) {
+            Ok(rotation) => println!("{}", rotation),
+            Err(err) => println!("Error: {}", err)
+        }
     }
 }
