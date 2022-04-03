@@ -7,7 +7,7 @@ const IMU_WIDTH: f32 = 1.0;
 const IMU_LENGTH: f32 = 1.0;
 
 /// A struct that describe a 3D rotation on xyz axis, where pitch is on x axis,
-/// roll on y axis and yaw on z axis
+/// roll on y axis and yaw on z axis. Angles unit is radians/s
 pub struct Rotation3D {
     pitch: f32,
     roll: f32,
@@ -30,6 +30,8 @@ impl Display for Rotation3D {
     }
 }
 
+
+/// rotate the given scene node (a cube in our case) by a given Rotation3D rotation
 fn rotate_cube(cube: &mut SceneNode, rotation: Rotation3D) {
     let pitch_rot = UnitQuaternion::from_axis_angle(&Vector3::x_axis(), rotation.pitch);
     let roll_rot = UnitQuaternion::from_axis_angle(&Vector3::z_axis(), rotation.roll);
