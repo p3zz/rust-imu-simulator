@@ -1,80 +1,13 @@
-extern crate kiss3d;
+mod input;
+mod rotation;
 
 use std::{error, io, thread};
-use std::fmt::{Display, Error, Formatter};
 use std::fs;
 use std::io::Stdin;
-use std::num::ParseFloatError;
-use std::rc::Rc;
 use kiss3d::window::Window;
 use kiss3d::light::Light;
 use kiss3d::nalgebra::{Vector3, UnitQuaternion, Point3, Point2};
 use kiss3d::scene::SceneNode;
-use regex::Regex;
-
-const IMU_HEIGHT: f32 = 0.5;
-const IMU_WIDTH: f32 = 1.0;
-const IMU_LENGTH: f32 = 1.0;
-
-/// A struct that describe a 3D rotation on xyz axis, where pitch is on x axis,
-/// roll on y axis and yaw on z axis
-struct Rotation3D {
-    pitch: f32,
-    roll: f32,
-    yaw: f32,
-}
-
-impl Rotation3D {
-    fn new(pitch: f32, roll: f32, yaw: f32) -> Rotation3D {
-        return Rotation3D {
-            pitch,
-            roll,
-            yaw,
-        };
-    }
-}
-
-impl Display for Rotation3D {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "pitch: {}, roll: {}, yaw: {}", &self.pitch, &self.roll, &self.yaw)
-    }
-}
-
-fn read_line_from_cl(stdin: &Stdin) -> String {
-    let mut buffer = String::new();
-    // read_line returns an error when a non-UTF8 character is read
-    stdin.read_line(&mut buffer);
-    buffer
-}
-
-fn parse_line(line: &String) -> Result<Option<Rotation3D>, ParseFloatError> {
-    // this regexp accept a string that contains 3 numbers (int or float) separated by a comma,
-    // and a new line at the end. The command line input must follow this pattern:
-    // 1.0,1.0,1.0\n
-    let regexp = Regex::new(r"^\d+(\.\d+)*,\d+(\.\d+)*,\d+(\.\d+)*\n$").unwrap();
-    if !regexp.is_match(line) {
-        return Ok(None);
-    }
-    let tmp = line.replace("\n", "");
-    let split: Vec<&str> = tmp.split(",").collect();
-    let pitch: f32 = split[0].parse()?;
-    let roll: f32 = split[1].parse()?;
-    let yaw: f32 = split[2].parse()?;
-    Ok(Some(Rotation3D::new(pitch, roll, yaw)))
-}
-
-fn spawn_read_line_thread() {}
-
-fn rotate_cube(cube: &mut SceneNode, rotation: Rotation3D) {
-    let pitch_rot = UnitQuaternion::from_axis_angle(&Vector3::x_axis(), rotation.pitch);
-    let roll_rot = UnitQuaternion::from_axis_angle(&Vector3::z_axis(), rotation.roll);
-    let yaw_rot = UnitQuaternion::from_axis_angle(&Vector3::y_axis(), rotation.yaw);
-
-    cube.prepend_to_local_rotation(&pitch_rot);
-    cube.prepend_to_local_rotation(&roll_rot);
-    cube.prepend_to_local_rotation(&yaw_rot);
-}
-
 
 fn main() {
     // let mut window = Window::new("Kiss3d: cube");
@@ -97,8 +30,8 @@ fn main() {
     let stdin: Stdin = io::stdin();
 
     loop {
-        let mut line = read_line_from_cl(&stdin);
-        match parse_line(&line) {
+        let mut line = input::read_line_from_cl(&stdin);
+        match input::parse_line(&line) {
             Ok(rotation) => match rotation {
                 None => println!("None value"),
                 Some(rot) => println!("Rotation: {}", rot)
