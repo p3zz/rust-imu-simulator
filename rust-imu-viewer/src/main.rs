@@ -43,15 +43,5 @@ fn main() {
             Err(e) => continue
         };
         println!("{}", line);
-
-
-        // let mut line = input::read_line_from_cl(&stdin);
-        // match input::parse_line(&line) {
-        //     Ok(rotation) => match rotation {
-        //         None => println!("None value"),
-        //         Some(rot) => println!("Rotation: {}", rot)
-        //     }
-        //     Err(err) => println!("Error: {}", err)
-        // }
     }
 }
