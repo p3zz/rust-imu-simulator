@@ -1,7 +1,21 @@
 use std::io::Stdin;
 use std::num::ParseFloatError;
+use std::{io, thread};
+use std::thread::spawn;
 use regex::Regex;
 use crate::rotation::Rotation3D;
+use crossbeam_channel::{Sender};
+
+pub fn spawn_read_line_thread(sender: Sender<Option<Rotation3D>>) {
+    let stdin: Stdin = io::stdin();
+    thread::spawn(move || loop {
+        let line: String = read_line_from_cl(&stdin);
+        match parse_line(&line) {
+            Ok(rotation) => sender.send(rotation).unwrap(),
+            Err(e) => println!("{}", e)
+        }
+    });
+}
 
 /// read a line from the given stdin, then returns it. Being the read_line a blocking function,
 /// don't use this function in a render loop
