@@ -4,6 +4,7 @@ mod rotation;
 use std::{error, io, thread};
 use std::fs;
 use std::io::Stdin;
+use crossbeam_channel::{bounded, select, TryRecvError, unbounded};
 use kiss3d::window::Window;
 use kiss3d::light::Light;
 use kiss3d::nalgebra::{Vector3, UnitQuaternion, Point3, Point2};
@@ -27,16 +28,30 @@ fn main() {
     //     window.draw_line(&origin, &Point3::new(0.0, 0.0, 5.0), &blue);
     // }
 
-    let stdin: Stdin = io::stdin();
+    let (tx, rx) = bounded(0);
+    input::spawn_read_line_thread(tx);
 
     loop {
-        let mut line = input::read_line_from_cl(&stdin);
-        match input::parse_line(&line) {
-            Ok(rotation) => match rotation {
-                None => println!("None value"),
-                Some(rot) => println!("Rotation: {}", rot)
-            }
-            Err(err) => println!("Error: {}", err)
-        }
+        let line = match rx.try_recv() {
+            Ok(msg) => match msg {
+                None => {
+                    println!("invalid input line");
+                    continue;
+                }
+                Some(rotation) => rotation
+            },
+            Err(e) => continue
+        };
+        println!("{}", line);
+
+
+        // let mut line = input::read_line_from_cl(&stdin);
+        // match input::parse_line(&line) {
+        //     Ok(rotation) => match rotation {
+        //         None => println!("None value"),
+        //         Some(rot) => println!("Rotation: {}", rot)
+        //     }
+        //     Err(err) => println!("Error: {}", err)
+        // }
     }
 }
