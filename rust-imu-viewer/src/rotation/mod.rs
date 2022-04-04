@@ -2,9 +2,9 @@ use std::fmt::{Display, Formatter};
 use kiss3d::scene::SceneNode;
 use kiss3d::nalgebra::{UnitQuaternion, Vector3};
 
-const IMU_HEIGHT: f32 = 0.5;
-const IMU_WIDTH: f32 = 1.0;
-const IMU_LENGTH: f32 = 1.0;
+pub const IMU_HEIGHT: f32 = 0.5;
+pub const IMU_WIDTH: f32 = 1.0;
+pub const IMU_LENGTH: f32 = 1.0;
 
 /// A struct that describe a 3D rotation on xyz axis, where pitch is on x axis,
 /// roll on y axis and yaw on z axis. Angles unit is radians/s
@@ -32,14 +32,10 @@ impl Display for Rotation3D {
 
 
 /// rotate the given scene node (a cube in our case) by a given Rotation3D rotation
-fn rotate_cube(cube: &mut SceneNode, rotation: Rotation3D) {
-    let pitch_rot = UnitQuaternion::from_axis_angle(&Vector3::x_axis(), rotation.pitch);
-    let roll_rot = UnitQuaternion::from_axis_angle(&Vector3::z_axis(), rotation.roll);
-    let yaw_rot = UnitQuaternion::from_axis_angle(&Vector3::y_axis(), rotation.yaw);
-
-    cube.prepend_to_local_rotation(&pitch_rot);
-    cube.prepend_to_local_rotation(&roll_rot);
-    cube.prepend_to_local_rotation(&yaw_rot);
+pub fn rotate_cube(cube: &mut SceneNode, rotation: Rotation3D) {
+    let rotation_vec = Vector3::new(rotation.pitch, rotation.roll, rotation.yaw);
+    let unit_rotation = UnitQuaternion::new(rotation_vec);
+    cube.set_local_rotation(unit_rotation);
 }
 
 
