@@ -1,7 +1,6 @@
 use std::io::Stdin;
 use std::num::ParseFloatError;
 use std::{io, thread};
-use std::thread::spawn;
 use regex::Regex;
 use crate::rotation::Rotation3D;
 use crossbeam_channel::{Sender};
@@ -9,26 +8,28 @@ use crossbeam_channel::{Sender};
 pub fn spawn_read_line_thread(sender: Sender<Option<Rotation3D>>) {
     let stdin: Stdin = io::stdin();
     thread::spawn(move || loop {
-        let line: String = read_line_from_cl(&stdin);
+        let line : String = read_line_from_cl(&stdin).unwrap_or(String::from(""));
         match parse_line(&line) {
             Ok(rotation) => sender.send(rotation).unwrap(),
             Err(e) => println!("{}", e)
-        }
+        }        
     });
 }
 
 /// read a line from the given stdin, then returns it. Being the read_line a blocking function,
 /// don't use this function in a render loop
-pub fn read_line_from_cl(stdin: &Stdin) -> String {
+pub fn read_line_from_cl(stdin: &Stdin) -> Option<String> {
     let mut buffer = String::new();
     // read_line returns an error when a non-UTF8 character is read
-    stdin.read_line(&mut buffer);
-    buffer
+    match stdin.read_line(&mut buffer){
+        Ok(_) => Some(buffer),
+        Err(_) => None
+    }
 }
 
 /// parse the given line and returns a Rotation3D struct it there are no errors.
 /// It first checks if the line match the correct pattern through a regexp, then proceed to split
-/// the line in the 3 rotation angles (pitch, roll, yaw). If the line doesn't match the pattern,
+/// the line in the 3 rotation angles (pitch, roll, yaw) in radians. If the line doesn't match the pattern,
 /// the function returns an Ok(None) result
 pub fn parse_line(line: &String) -> Result<Option<Rotation3D>, ParseFloatError> {
     // this regexp accept a string that contains 3 numbers (int or float) separated by a comma,

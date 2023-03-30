@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 use kiss3d::light::Light;
 use kiss3d::scene::SceneNode;
-use kiss3d::nalgebra::{Point, Point3, UnitQuaternion, Vector3};
+use kiss3d::nalgebra::{Point3, UnitQuaternion, Vector3};
 use kiss3d::window::Window;
 
 pub const IMU_HEIGHT: f32 = 0.5;
@@ -69,7 +69,6 @@ struct GraphicAxis {
     pub x: GraphicLine,
     pub y: GraphicLine,
     pub z: GraphicLine,
-    origin: Point3<f32>,
 }
 
 impl GraphicAxis {
@@ -81,7 +80,6 @@ impl GraphicAxis {
             x: GraphicLine::new(origin, Point3::new(length, 0.0, 0.0), color.red),
             y: GraphicLine::new(origin, Point3::new(0.0, length, 0.0), color.blue),
             z: GraphicLine::new(origin, Point3::new(0.0, 0.0, length), color.green),
-            origin,
         }
     }
 }

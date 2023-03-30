@@ -1,14 +1,7 @@
 mod input;
 mod rotation;
 
-use std::{error, io, thread};
-use std::fs;
-use std::io::Stdin;
-use crossbeam_channel::{bounded, select, TryRecvError, unbounded};
-use kiss3d::window::Window;
-use kiss3d::light::Light;
-use kiss3d::nalgebra::{Vector3, UnitQuaternion, Point3, Point2};
-use kiss3d::scene::SceneNode;
+use crossbeam_channel::bounded;
 use crate::rotation::{IMU_HEIGHT, IMU_LENGTH, IMU_WIDTH, rotate_cube};
 
 fn main() {
@@ -30,7 +23,7 @@ fn main() {
                 }
                 Some(rot) => rot
             },
-            Err(e) => continue
+            Err(_) => continue
         };
         rotate_cube(&mut cube, rotation);
     }
