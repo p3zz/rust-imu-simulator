@@ -1,9 +1,18 @@
 # IMU 3D Viewer
 A Rust project for real-time imu simulation
 
-## Simulation
-From the root directory:
+# Description
+The IMU is shown as a 3D red cube and rotates of a given rotation (pitch, roll, yaw), in radians, read from stdin.
+
+The correct input format is: *pitch*,*roll*,*yaw*\n
+
+
+# Build
 ```bash
-cd rust-imu-viewer && 
+cargo build
+```
+
+## Run
+```bash
 node tools/simulator.js | cargo run
 ```
