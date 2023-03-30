@@ -29,7 +29,7 @@ pub fn read_line_from_cl(stdin: &Stdin) -> Option<String> {
 
 /// parse the given line and returns a Rotation3D struct it there are no errors.
 /// It first checks if the line match the correct pattern through a regexp, then proceed to split
-/// the line in the 3 rotation angles (pitch, roll, yaw). If the line doesn't match the pattern,
+/// the line in the 3 rotation angles (pitch, roll, yaw) in radians. If the line doesn't match the pattern,
 /// the function returns an Ok(None) result
 pub fn parse_line(line: &String) -> Result<Option<Rotation3D>, ParseFloatError> {
     // this regexp accept a string that contains 3 numbers (int or float) separated by a comma,
